@@ -33,7 +33,7 @@ function start() {
     discover.discover(function(err, gws) {
         if (err) console.log('Error: ' + err);
         else console.log('All discovered gateways: ' + JSON.stringify(gws));
-    }
+    });
 }
  /*   
     log.info('mqtt trying to connect', config.mqttUrl);
