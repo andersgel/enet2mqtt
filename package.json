@@ -4,7 +4,7 @@
   "description": "Bridge between  Gira Enet Mobile Gate and MQTT ",
   "main": "index.js",
   "bin": {
-    "hue2mqtt": "index.js"
+    "enet2mqtt": "index.js"
   },
   "preferGlobal": true,
 
