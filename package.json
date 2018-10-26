@@ -1,7 +1,7 @@
 {
-  "name": "hue2mqtt",
-  "version": "1.2.0",
-  "description": "Gateway between a Philips Hue bridge and MQTT",
+  "name": "enet2mqtt",
+  "version": "0.0.1",
+  "description": "Bridge between  Gira Enet Mobile Gate and MQTT ",
   "main": "index.js",
   "bin": {
     "hue2mqtt": "index.js"
