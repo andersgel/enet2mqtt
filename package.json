@@ -1,0 +1,49 @@
+{
+  "name": "hue2mqtt",
+  "version": "1.2.0",
+  "description": "Gateway between a Philips Hue bridge and MQTT",
+  "main": "index.js",
+  "bin": {
+    "hue2mqtt": "index.js"
+  },
+  "preferGlobal": true,
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andersgel/enet2mqtt"
+  },
+  "keywords": [
+    "mqtt",
+    "smarthome",
+    "enet",
+    "gira"
+  ],
+  "author": "Anders Gellein https://github.com/andersgel ",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andersgel/enet2mqtt/issues"
+  },
+  "homepage": "https://github.com/andersgel/enet2mqtt",
+  "dependencies": {
+    "mqtt": "^2.16.0",
+    "node-enet-api": "^0.1.0",
+    "obj-ease": "^1.0.1",
+    "persist-json": "^1.0.1",
+    "yalm": "^4.1.0",
+    "yargs": "^11.0.0"
+  },
+  "yargs": {
+    "boolean-negation": false
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "devDependencies": {},
+  "xo": {
+    "space": 4,
+    "ignore": [
+      "test.js"
+    ]
+  }
+}
