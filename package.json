@@ -1,0 +1,42 @@
+{
+  "name": "enet2mqtt",
+  "version": "0.0.1",
+  "description": "Bridge between  Gira Enet Mobile Gate and MQTT ",
+  "license": "MIT",
+  "main": "index.js",
+  "bin": {
+    "enet2mqtt": "index.js"
+  },
+  "keywords": [
+    "node",
+    "eNet",
+    "mqtt",
+    "smarthome",
+    "gira"
+  ],
+  "engines": {
+    "node": ">=0.12.0"
+  },
+  "author": {
+    "name": "Anders Gellein"
+  },
+  "homepage": "https://github.com/andersgel/enet2mqtt",
+  "bugs": {
+    "url": "https://github.com/andersgel/enet2mqtt/issues"
+   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/andersgel/enet2mqtt"
+  },
+    "yargs": {
+    "boolean-negation": false
+  },
+    "dependencies": {
+    "mqtt": "^2.16.0",
+    "node-enet-api": "^0.1.0",
+    "obj-ease": "^1.0.1",
+    "persist-json": "^1.0.1",
+    "yalm": "^4.1.0",
+    "yargs": "^11.0.0"
+  }
+}
