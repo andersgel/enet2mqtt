@@ -28,30 +28,14 @@ function start() {
     log.info(pkg.name + ' ' + pkg.version + ' starting');
 
     //Find gateway
-	var discover = new eNet.discover();
-	
-	eNet.discover.discover
-	
-	if (config.bridge) {
-        bridgeAddress = config.bridge;
-        log.debug('bridge address', bridgeAddress);
-        getBridgeId();
-    } else {
-        Hue.nupnpSearch((err, result) => {
-            if (err) {
-                log.error('can\'t find a hue bridge', err.toString());
-                process.exit(1);
-            } else if (result.length > 0) {
-                bridgeAddress = result[0].ipaddress;
-                log.info('found bridge on', bridgeAddress);
-                getBridgeId();
-            } else {
-                log.error('can\'t find a hue bridge');
-                process.exit(1);
-            }
-        });
-    }
+    var discover = new eNet.discover();
 
+    discover.discover(function(err, gws) {
+        if (err) console.log('Error: ' + err);
+        else console.log('All discovered gateways: ' + JSON.stringify(gws));
+    }
+}
+ /*   
     log.info('mqtt trying to connect', config.mqttUrl);
 
     mqtt = Mqtt.connect(config.mqttUrl, {
@@ -140,6 +124,7 @@ function start() {
     });
 }
 
+/*  
 function setGroupLightState(name, state) {
     const id = groupNames[name] || name;
     if (id) {
@@ -423,5 +408,5 @@ function publishChanges(light) {
         }
     }
 }
-
+*/
 start();
