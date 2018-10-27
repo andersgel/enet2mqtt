@@ -30,9 +30,23 @@ function start() {
     //Find gateway
     var discover = new eNet.discover();
 
+    discover.on('discover', function(gw) {
+        log.info('New gateway: ' + JSON.stringify(gw));
+        var gw = eNet.gateway(gw);
+        gw.connect();
+        
+        log.info("Requesting gateway version.");
+        gw.getVersion(function(err, res) {
+            if (err) console.log("error: " + err);
+            else log.info("command succeeded: \n" + JSON.stringify(res));
+        })
+    });
+    
     discover.discover(function(err, gws) {
         if (err) log.error('Error: ' + err);
-        else log.info('All discovered gateways: ' + JSON.stringify(gws));
+        else {
+            log.info('All discovered gateways: ' + JSON.stringify(gws));
+            return gws;
     });
     
 }
