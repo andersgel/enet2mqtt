@@ -132,6 +132,7 @@ function start() {
                         } else if (typeof payload === 'object') {
                             setGroupLightState(name, payload);
                         } else {
+                            signIn(type, name, payload);
                             setValue(type, name, payload);
                         }
                         break;
@@ -146,12 +147,7 @@ function start() {
         }
     });
     
-    gw.on(channel.toString(), function(err, msg) {
-    if (err) log.error("error: " + err);
-    else {
-        log.info("data for channel: " + channel + ": " + JSON.stringify(msg));
-    }
-    });
+    
     
 
 
@@ -168,10 +164,19 @@ function setValue(type, name, payload) {
 };
 
 function signIn(type, name, payload) {
-    gw.signIn([channel], function(err, res) {
+    gw.signIn(name, function(err, res) {
     if (err) log.error("sign in error: " + err);
-    else log.error("sign in succeeded: \n" + JSON.stringify(res));
+    else log.info("sign in succeeded: \n" + JSON.stringify(res));
     });
+    
+    gw.on(name, function(err, msg) {
+    if (err) log.error("error: " + err);
+    else {
+        log.info("data for channel: " + channel + ": " + JSON.stringify(msg));
+    }
+    });
+    
+    
 };
 
  
