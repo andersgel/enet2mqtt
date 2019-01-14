@@ -121,8 +121,8 @@ function start() {
                         } else if (typeof payload === 'object') {
                             setLightState(name, payload);
                         } else {
-                            stringOut = setValue(type, name, payload);
-                            mqttPublish('enet/get/lights/'+ datapoint , stringOut, {retain: config.mqttRetain})
+                            setValue(type, name, payload);
+                            
                         }
                         break;
 
@@ -150,7 +150,10 @@ function start() {
 function setValue(type, name, payload) {
     gw.setValueDim(name, payload, function(err, res) {
         if (err) log.error("error: " + err);
-        else log.info("Channel command succeeded: \n" + JSON.stringify(res));
+        else {
+            log.info("Channel command succeeded: \n" + JSON.stringify(res));
+            mqttPublish('enet/get/lights/'+ name , res.STATE, {retain: config.mqttRetain});
+        }
     });
     
     
