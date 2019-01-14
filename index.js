@@ -12,11 +12,9 @@ const pkg = require('./package.json');
 
 let mqtt;
 let mqttConnected = false;
-let bridgeConnected = false;
-let bridgeAddress;
-let bridgeId;
-let bridgeUser;
-let hue;
+let enetConnected = false;
+let enetDiscovered = false;
+let enetAddress;
 let pollingTimer;
 const pollingInterval = (config.pollingInterval || 60) * 1000;
 const groupNames = {};
@@ -33,24 +31,33 @@ function start() {
     discover.on('discover', function(gw) {
         log.info('New gateway: ' + JSON.stringify(gw));
         var gw = eNet.gateway(gw);
+        enetAddress = gw.host;
+	log.info (enetAddress);
         gw.connect();
-        
+
         log.info("Requesting gateway version.");
         gw.getVersion(function(err, res) {
-            if (err) console.log("error: " + err);
-            else log.info("command succeeded: \n" + JSON.stringify(res));
-        })
-    });
+            if (err) log.error("error: " + err);
+            else log.debug("command succeeded: \n" + JSON.stringify(res));
+        });
+
+	log.info("Requesting Channel Info");
+        gw.getChannelInfo(function(err, res) {
+            if (err) log.error("error: " + err);
+            else log.debug("command succeeded: \n" + JSON.stringify(res));
+        });
+
+        log.info("Requesting Project List"); 
+        gw.getProjectList(function(err, res) {
+            if (err) log.error("error: " + err);
+            else log.debug("command succeeded: \n" + JSON.stringify(res));
+        });
+
+        enetDiscovered = true;
     
-    discover.discover(function(err, gws) {
-        if (err) log.error('Error: ' + err);
-        else {
-            log.info('All discovered gateways: ' + JSON.stringify(gws));
-            return gws;
-    });
-    
-}
- /*   
+
+
+    //Connect to mqtt
     log.info('mqtt trying to connect', config.mqttUrl);
 
     mqtt = Mqtt.connect(config.mqttUrl, {
@@ -62,7 +69,7 @@ function start() {
     mqtt.on('connect', () => {
         mqttConnected = true;
         log.info('mqtt connected', config.mqttUrl);
-        mqtt.publish(config.name + '/connected', bridgeConnected ? '2' : '1', {retain: config.mqttRetain});
+        mqtt.publish(config.name + '/connected', enetConnected ? '2' : '1', {retain: config.mqttRetain});
         log.info('mqtt subscribe', config.name + '/set/#');
         mqtt.subscribe(config.name + '/set/#');
     });
@@ -137,7 +144,29 @@ function start() {
                 log.error('unknown method', method);
         }
     });
+
+
+function setValue(type, name, payload) {
+    gw.setValueDim(name, payload, function(err, res) {
+        if (err) log.error("error: " + err);
+        else log.info("Channel command succeeded: \n" + JSON.stringify(res));
+    });
+};
+
+
+
+});
+
+discover.discover(function(err, gws) {
+    if (err) console.log('Error: ' + err);
+    else console.log('All discovered gateways: ' + JSON.stringify(gws));
+});
+
+
+
 }
+
+
 
 /*  
 function setGroupLightState(name, state) {
@@ -204,13 +233,22 @@ function setDatapoint(type, name, datapoint, payload) {
         setLightState(name, obj);
     }
 }
+*/
 
 function setValue(type, name, payload) {
-    if (payload === false) {
+    gw.setValueDim(name, payload, function(err, res) {
+        if (err) log.error("error: " + err); 
+        else log.info("Channel command succeeded: \n" + JSON.stringify(res));
+    });
+};
+
+/* if (payload === false) {
         payload = {on: false};
-    } else if (payload === true) {
+    }
+    else if (payload === true) {
         payload = {on: true};
-    } else {
+    } 
+    else {
         payload = parseInt(payload, 10);
         if (payload === 0) {
             payload = {on: false, bri: 0};
@@ -225,6 +263,7 @@ function setValue(type, name, payload) {
     }
 }
 
+/*
 function mqttPublish(topic, payload, options) {
     if (!payload) {
         payload = '';
