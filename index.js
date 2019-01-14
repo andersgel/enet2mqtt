@@ -54,13 +54,11 @@ function start() {
         });
         
         gw.on('16', function(err, msg) {
-            if (err) log.error("error: " + err);
-            else {
-                log.info("data for channel: " + channel + ": " + JSON.stringify(msg));
-            }
+            if (!err && msg) log.info("data for channel: 16:" + JSON.stringify(msg));
+            
         });
 
-        signIn([16,17,18,19]);
+        signIn([16]);
         
         enetDiscovered = true;
     
