@@ -52,6 +52,13 @@ function start() {
             if (err) log.error("error: " + err);
             else log.debug("command succeeded: \n" + JSON.stringify(res));
         });
+        
+        gw.on('16', function(err, msg) {
+            if (err) log.error("error: " + err);
+            else {
+                log.info("data for channel: " + channel + ": " + JSON.stringify(msg));
+            }
+        });
 
         signIn([16,17,18,19]);
         
@@ -169,17 +176,6 @@ function signIn(name) {
     if (err) log.error("sign in error: " + err);
     else log.info("sign in succeeded: \n" + JSON.stringify(res));
     });
-};
-    
-function subscribe(name){
-    gw.on(name, function(err, msg) {
-    if (err) log.error("error: " + err);
-    else {
-        log.info("data for channel: " + channel + ": " + JSON.stringify(msg));
-    }
-    });
-    
-    
 };
 
  
