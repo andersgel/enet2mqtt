@@ -53,6 +53,8 @@ function start() {
             else log.debug("command succeeded: \n" + JSON.stringify(res));
         });
 
+        signIn([16,17,18,19]);
+        
         enetDiscovered = true;
     
 
@@ -121,8 +123,8 @@ function start() {
                         } else if (typeof payload === 'object') {
                             setLightState(name, payload);
                         } else {
+                            subscribe(name);
                             setValue(type, name, payload);
-                            
                         }
                         break;
 
@@ -132,7 +134,6 @@ function start() {
                         } else if (typeof payload === 'object') {
                             setGroupLightState(name, payload);
                         } else {
-                            signIn(type, name, payload);
                             setValue(type, name, payload);
                         }
                         break;
@@ -163,12 +164,14 @@ function setValue(type, name, payload) {
     
 };
 
-function signIn(type, name, payload) {
+function signIn(name) {
     gw.signIn(name, function(err, res) {
     if (err) log.error("sign in error: " + err);
     else log.info("sign in succeeded: \n" + JSON.stringify(res));
     });
+};
     
+function subscribe(name){
     gw.on(name, function(err, msg) {
     if (err) log.error("error: " + err);
     else {
