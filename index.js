@@ -121,7 +121,8 @@ function start() {
                         } else if (typeof payload === 'object') {
                             setLightState(name, payload);
                         } else {
-                            setValue(type, name, payload);
+                            stringOut = setValue(type, name, payload);
+                            mqttPublish('enet/get/lights/'+ datapoint , stringOut, {retain: config.mqttRetain})
                         }
                         break;
 
@@ -151,6 +152,18 @@ function setValue(type, name, payload) {
         if (err) log.error("error: " + err);
         else log.info("Channel command succeeded: \n" + JSON.stringify(res));
     });
+    
+    
+};
+
+function mqttPublish(topic, payload, options) {
+    if (!payload) {
+        payload = '';
+    } else if (typeof payload !== 'string') {
+        payload = JSON.stringify(payload);
+    }
+    log.debug('mqtt >', topic, payload);
+    mqtt.publish(topic, payload, options);
 };
 
 
