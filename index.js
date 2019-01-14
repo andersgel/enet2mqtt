@@ -145,6 +145,14 @@ function start() {
                 log.error('unknown method', method);
         }
     });
+    
+    gw.on(channel.toString(), function(err, msg) {
+    if (err) log.error("error: " + err);
+    else {
+        log.info("data for channel: " + channel + ": " + JSON.stringify(msg));
+    }
+    });
+    
 
 
 function setValue(type, name, payload) {
@@ -158,6 +166,16 @@ function setValue(type, name, payload) {
     
     
 };
+
+function signIn(type, name, payload) {
+    gw.signIn([channel], function(err, res) {
+    if (err) log.error("sign in error: " + err);
+    else log.error("sign in succeeded: \n" + JSON.stringify(res));
+    });
+};
+
+ 
+
 
 function mqttPublish(topic, payload, options) {
     if (!payload) {
