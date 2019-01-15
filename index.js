@@ -57,6 +57,11 @@ function start() {
             if (!err && msg) log.info("data for channel: 16:" + JSON.stringify(msg));
             
         });
+        
+        gpw.on('gateway', function(err, msg) {
+            if (!err && msg) log.info("Gateway:" + JSON.stringify(msg));
+            
+        });
 
         signIn([16]);
         
