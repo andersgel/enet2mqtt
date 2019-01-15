@@ -58,6 +58,23 @@ function start() {
             
         });
         
+        gw.client.on('data', function(data) {
+            this.data += data;
+            var arr = this.data.split("\r\n\r\n");
+
+             this.data = arr[arr.length-1];
+
+            for (var i = 0; i < arr.length-1; ++i) {
+                try{
+                    var json=JSON.parse(arr[i]);
+                    log.info("Gateway:" + JSON.stringify(json));
+                }catch(e){
+                    log.error(e);
+                }
+            }    
+        }.bind(this));
+                
+                
         gpw.on('gateway', function(err, msg) {
             if (!err && msg) log.info("Gateway:" + JSON.stringify(msg));
             
