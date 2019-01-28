@@ -16,164 +16,178 @@ let enetConnected = false;
 let enetDiscovered = false;
 let enetAddress;
 let pollingTimer;
+var gw;
 const pollingInterval = (config.pollingInterval || 60) * 1000;
 const groupNames = {};
 const lightNames = {};
 const lightStates = {};
 
-function start() {
-    log.setLevel(config.verbosity);
-    log.info(pkg.name + ' ' + pkg.version + ' starting');
 
-    //Find gateway
-    var discover = new eNet.discover();
+log.setLevel(config.verbosity);
+log.info(pkg.name + ' ' + pkg.version + ' starting');
 
-    discover.on('discover', function(gw) {
-        log.info('New gateway: ' + JSON.stringify(gw));
-        var gw = eNet.gateway(gw);
-        enetAddress = gw.host;
-	log.info (enetAddress);
-        gw.connect();
+//Find gateway
+var discover = new eNet.discover();
 
-        log.info("Requesting gateway version.");
-        gw.getVersion(function(err, res) {
-            if (err) log.error("error: " + err);
-            else log.debug("command succeeded: \n" + JSON.stringify(res));
-        });
-
-	log.info("Requesting Channel Info");
-        gw.getChannelInfo(function(err, res) {
-            if (err) log.error("error: " + err);
-            else log.debug("command succeeded: \n" + JSON.stringify(res));
-        });
-
-        log.info("Requesting Project List"); 
-        gw.getProjectList(function(err, res) {
-            if (err) log.error("error: " + err);
-            else log.debug("command succeeded: \n" + JSON.stringify(res));
-        });
-        
-        gw.on('16', function(err, msg) {
-            if (!err && msg) log.info("data for channel: 16:" + JSON.stringify(msg));
-            
-        });
-        
-        gw.client.on('data', function(data) {
-            this.data += data;
-            var arr = this.data.split("\r\n\r\n");
-
-             this.data = arr[arr.length-1];
-
-            for (var i = 0; i < arr.length-1; ++i) {
-                try{
-                    var json=JSON.parse(arr[i]);
-                    log.info("Gateway:" + JSON.stringify(json));
-                }catch(e){
-                    log.error(e);
-                }
-            }    
-        }.bind(this));
-                
-                
-        gpw.on('gateway', function(err, msg) {
-            if (!err && msg) log.info("Gateway:" + JSON.stringify(msg));
-            
-        });
-
-        signIn([16]);
-        
-        enetDiscovered = true;
+discover.on('discover', function(gws) {
+    log.info('New gateway: ' + JSON.stringify(gws));
+    gw = eNet.gateway(gws);
+    enetDiscovered = true;
+});
     
+//Wait for discovery
+while (!enetDiscovered){
+        
+}
+    
+//connect to the discovered gateway
+enetAddress = gw.host;
+log.info (enetAddress);
+gw.connect();
 
+//get gateway version
+log.info("Requesting gateway version.");
+gw.getVersion(function(err, res) {
+    if (err) log.error("error: " + err);
+    else log.debug("command succeeded: \n" + JSON.stringify(res));
+});
 
-    //Connect to mqtt
-    log.info('mqtt trying to connect', config.mqttUrl);
+//get channel info
+log.info("Requesting Channel Info");
+gw.getChannelInfo(function(err, res) {
+    if (err) log.error("error: " + err);
+    else log.debug("command succeeded: \n" + JSON.stringify(res));
+});
 
-    mqtt = Mqtt.connect(config.mqttUrl, {
-        clientId: config.name + '_' + Math.random().toString(16).substr(2, 8),
-        will: {topic: config.name + '/connected', payload: '0', retain: (config.mqttRetain)},
-        rejectUnauthorized: !config.insecure
-    });
+//get project listStyleType
+log.info("Requesting Project List"); 
+gw.getProjectList(function(err, res) {
+    if (err) log.error("error: " + err);
+    else log.debug("command succeeded: \n" + JSON.stringify(res));
+});
 
-    mqtt.on('connect', () => {
-        mqttConnected = true;
-        log.info('mqtt connected', config.mqttUrl);
-        mqtt.publish(config.name + '/connected', enetConnected ? '2' : '1', {retain: config.mqttRetain});
-        log.info('mqtt subscribe', config.name + '/set/#');
-        mqtt.subscribe(config.name + '/set/#');
-    });
+//test channel
+gw.on('16', function(err, msg) {
+    if (!err && msg) log.info("data for channel: 16:" + JSON.stringify(msg));
+    
+});
 
-    mqtt.on('close', () => {
-        if (mqttConnected) {
-            mqttConnected = false;
-            log.info('mqtt closed ' + config.mqttUrl);
+//trying to get all data from signed in channels
+gw.client.on('data', function(data) {
+    this.data += data;
+    var arr = this.data.split("\r\n\r\n");
+
+     this.data = arr[arr.length-1];
+
+    for (var i = 0; i < arr.length-1; ++i) {
+        try{
+            var json=JSON.parse(arr[i]);
+            log.info("Gateway:" + JSON.stringify(json));
+        }catch(e){
+            log.error(e);
         }
-    });
+    }    
+}.bind(this));
+        
+//general gateway message            
+gw.on('gateway', function(err, msg) {
+    if (!err && msg) log.info("Gateway:" + JSON.stringify(msg));
+});
 
-    mqtt.on('error', err => {
-        log.error('mqtt', err.toString());
-    });
+signIn([16]);
 
-    mqtt.on('offline', () => {
-        log.error('mqtt offline');
-    });
+enetDiscovered = true;
 
-    mqtt.on('reconnect', () => {
-        log.info('mqtt reconnect');
-    });
 
-    mqtt.on('message', (topic, payload) => {
-        payload = payload.toString();
-        log.debug('mqtt <', topic, payload);
 
-        if (payload.indexOf('{') !== -1) {
-            try {
-                payload = JSON.parse(payload);
-            } catch (err) {
-                log.error(err.toString());
+//Connect to mqtt
+log.info('mqtt trying to connect', config.mqttUrl);
+
+mqtt = Mqtt.connect(config.mqttUrl, {
+    clientId: config.name + '_' + Math.random().toString(16).substr(2, 8),
+    will: {topic: config.name + '/connected', payload: '0', retain: (config.mqttRetain)},
+    rejectUnauthorized: !config.insecure
+});
+
+mqtt.on('connect', () => {
+    mqttConnected = true;
+    log.info('mqtt connected', config.mqttUrl);
+    mqtt.publish(config.name + '/connected', enetConnected ? '2' : '1', {retain: config.mqttRetain});
+    log.info('mqtt subscribe', config.name + '/set/#');
+    mqtt.subscribe(config.name + '/set/#');
+});
+
+mqtt.on('close', () => {
+    if (mqttConnected) {
+        mqttConnected = false;
+        log.info('mqtt closed ' + config.mqttUrl);
+    }
+});
+
+mqtt.on('error', err => {
+    log.error('mqtt', err.toString());
+});
+
+mqtt.on('offline', () => {
+    log.error('mqtt offline');
+});
+
+mqtt.on('reconnect', () => {
+    log.info('mqtt reconnect');
+});
+
+mqtt.on('message', (topic, payload) => {
+    payload = payload.toString();
+    log.debug('mqtt <', topic, payload);
+
+    if (payload.indexOf('{') !== -1) {
+        try {
+            payload = JSON.parse(payload);
+        } catch (err) {
+            log.error(err.toString());
+        }
+    } else if (payload === 'false') {
+        payload = false;
+    } else if (payload === 'true') {
+        payload = true;
+    } else if (!isNaN(payload)) {
+        payload = parseFloat(payload);
+    }
+    const [, method, type, name, datapoint] = topic.split('/');
+
+    switch (method) {
+        case 'set':
+            switch (type) {
+                case 'lights':
+                    if (datapoint) {
+                        setDatapoint(type, name, datapoint, payload);
+                    } else if (typeof payload === 'object') {
+                        setLightState(name, payload);
+                    } else {
+                        subscribe(name);
+                        setValue(type, name, payload);
+                    }
+                    break;
+
+                case 'groups':
+                    if (datapoint) {
+                        setDatapoint(type, name, datapoint, payload);
+                    } else if (typeof payload === 'object') {
+                        setGroupLightState(name, payload);
+                    } else {
+                        setValue(type, name, payload);
+                    }
+                    break;
+
+                default:
+                    log.error('unknown type', type);
             }
-        } else if (payload === 'false') {
-            payload = false;
-        } else if (payload === 'true') {
-            payload = true;
-        } else if (!isNaN(payload)) {
-            payload = parseFloat(payload);
-        }
-        const [, method, type, name, datapoint] = topic.split('/');
+            break;
 
-        switch (method) {
-            case 'set':
-                switch (type) {
-                    case 'lights':
-                        if (datapoint) {
-                            setDatapoint(type, name, datapoint, payload);
-                        } else if (typeof payload === 'object') {
-                            setLightState(name, payload);
-                        } else {
-                            subscribe(name);
-                            setValue(type, name, payload);
-                        }
-                        break;
-
-                    case 'groups':
-                        if (datapoint) {
-                            setDatapoint(type, name, datapoint, payload);
-                        } else if (typeof payload === 'object') {
-                            setGroupLightState(name, payload);
-                        } else {
-                            setValue(type, name, payload);
-                        }
-                        break;
-
-                    default:
-                        log.error('unknown type', type);
-                }
-                break;
-
-            default:
-                log.error('unknown method', method);
-        }
-    });
+        default:
+            log.error('unknown method', method);
+    }
+});
     
     
     
@@ -186,9 +200,7 @@ function setValue(type, name, payload) {
             log.info("Channel command succeeded: \n" + JSON.stringify(res));
             mqttPublish('enet/get/lights/'+ name , res.STATE, {retain: config.mqttRetain});
         }
-    });
-    
-    
+    });   
 };
 
 function signIn(name) {
@@ -213,7 +225,6 @@ function mqttPublish(topic, payload, options) {
 
 
 
-});
 
 discover.discover(function(err, gws) {
     if (err) console.log('Error: ' + err);
@@ -222,7 +233,7 @@ discover.discover(function(err, gws) {
 
 
 
-}
+
 
 
 
