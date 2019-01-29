@@ -7,7 +7,7 @@ module.exports = require('yargs')
     .describe('name', 'instance name. used as mqtt client id and as prefix for connected topic')
     .describe('mqtt-url', 'mqtt broker url.')
     .describe('help', 'show help')
-    .describe('channelArray', 'Array with channels to monitor, [ch1, ch2, ..])
+    .describe('channelArray', 'Array with channels to monitor, [ch1, ch2, ..]')
     .describe('mqtt-retain', 'enable/disable retain flag for mqtt messages')
     .alias({
         h: 'help',

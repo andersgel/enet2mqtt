@@ -81,7 +81,7 @@ function discovered()
                     log.info("Gateway:" + JSON.stringify(json));
                     for (var i = 0; i < json.VALUES.length; i++){
                         mqttPublish('enet/get/dimmmer/'+json.VALUES[i].NUMBER  , json.VALUES[i].VALUE, {retain: config.mqttRetain});
-                        mqttPublish('enet/get/switch/'+json.VALUES[i].NUMBER  , json.VALUES[i].VALUE, {retain: config.mqttRetain});
+                        mqttPublish('enet/get/switch/'+json.VALUES[i].NUMBER  , json.VALUES[i].STATE, {retain: config.mqttRetain});
                     }
                 }
             }
@@ -93,11 +93,9 @@ function discovered()
     
     //sign in to channels if connection to enet is lost
     gw.client.on('close', function() {
-        (config.channelArray);
-    });                                                                                     
-        
-    
-            
+        signIn(config.channelArray);
+    });
+
     //sign in every 5 minutes
     (function(){
         signIn(config.channelArray);
@@ -122,7 +120,7 @@ function discovered()
         log.info('mqtt connected', config.mqttUrl);
         mqtt.publish(config.name + '/connected', enetConnected ? '2' : '1', {retain: config.mqttRetain});
         log.info('mqtt subscribe', config.name + '/set/#');
-        mqtt.subscribe(config.name + '/set/#');
+	mqtt.subscribe(config.name + '/set/#');
     });
     
     mqtt.on('close', () => {
@@ -176,7 +174,7 @@ function discovered()
                                 break;
                             case 'OFF':
                                 setValue(type, name, 0);
-                                break:
+                                break;
                             default:
                             log.error('unknown type', type);  
                         }
